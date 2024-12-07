@@ -38,6 +38,7 @@ const Orders = () => {
           <div className="col-12 mt-3">
             {orderState &&
               orderState?.map((item, index) => {
+                console.log(item)
                 return (
                   <div
                     style={{ backgroundColor: "#febd69" }}
@@ -70,9 +71,6 @@ const Orders = () => {
                         <div className="col-3">
                           <h6 className="text-white">Price</h6>
                         </div>
-                        <div className="col-3">
-                          <h6 className="text-white">Color</h6>
-                        </div>
                         {item?.orderItems?.map((i, index) => {
                           return (
                             <div className="col-12">
@@ -87,13 +85,6 @@ const Orders = () => {
                                 </div>
                                 <div className="col-3">
                                   <p className="text-white">{i?.price}</p>
-                                </div>
-                                <div className="col-3">
-                                  <ul className="colors ps-0">
-                                    <li
-                                      style={{ backgroundColor: i?.color }}
-                                    ></li>
-                                  </ul>
                                 </div>
                               </div>
                             </div>

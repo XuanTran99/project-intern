@@ -7,8 +7,12 @@ import "react-toastify/dist/ReactToastify.css";
 const Layout = () => {
   return (
     <>
-      <Header />
-      <Outlet />
+      <div style={{ zIndex: 99 }}>
+        <Header />
+      </div>
+      <div style={{ zIndex: 1, paddingTop: 180 }}>
+        <Outlet />
+      </div>
       <Footer />
       <ToastContainer
         position="top-right"

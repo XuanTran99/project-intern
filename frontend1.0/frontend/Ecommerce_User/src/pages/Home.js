@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Marquee from "react-fast-marquee";
 import BlogCard from "../components/BlogCard";
 import ProductCard from "../components/ProductCard";
@@ -17,17 +17,34 @@ import watch2 from "../images/watch-1.avif";
 import addcart from "../images/add-cart.svg";
 import view from "../images/view.svg";
 import { addToWishlist } from "../features/products/productSlice";
+import axios from "axios";
+import { base_url } from "../utils/axiosConfig";
+import ItemWishList from "../components/ItemWishList";
+import right from '../images/right.png'
+import left from '../images/left.png'
 
-const Home = () => {
+const Home = (props) => {
+
+  let location = useLocation();
+  const { grid, data } = props;
+
   const blogState = useSelector((state) => state?.blog?.blog);
   const productState = useSelector((state) => state.product.product);
   const navigate = useNavigate();
+
+  const [topProduct, setTopProduct] = useState([])
+
+  const [dataSubCategoires, setDataSubCategoires] = useState([])
 
   const dispatch = useDispatch();
   useEffect(() => {
     getblogs();
     getallProducts();
+    handleGetTopProduct()
+    handleGetSubcategories()
   }, []);
+
+
   const getblogs = () => {
     dispatch(getAllBlogs());
   };
@@ -38,6 +55,76 @@ const Home = () => {
   const addToWish = (id) => {
     dispatch(addToWishlist(id));
   };
+
+
+  async function handleGetTopProduct() {
+    axios.get(base_url + `product/top-product`, {
+      params: {
+        limit: 6
+      },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((res) => {
+      setTopProduct(res.data)
+
+    }).catch((err) => {
+      setTopProduct([])
+
+    })
+  }
+
+
+  async function handleGetSubcategories() {
+    axios.get(base_url + `subcategories`, {
+      params: {
+        limit: 3
+      },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((res) => {
+      setDataSubCategoires(res.data)
+
+      // setTopProduct(res.data)
+
+    }).catch((err) => {
+      setDataSubCategoires([])
+
+    })
+  }
+
+  const scrollContainerRef = useRef();
+
+  // Hàm cuộn về trái
+  const handleScrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        left: 0, // Cuộn về chỉ mục 0
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  // Hàm cuộn về phải
+  const handleScrollRight = () => {
+    if (scrollContainerRef.current) {
+      const currentScrollPosition = scrollContainerRef.current.scrollLeft;
+      const containerWidth = scrollContainerRef.current.offsetWidth;
+      const scrollWidth = scrollContainerRef.current.scrollWidth;
+
+      const nextScrollPosition = Math.min(
+        currentScrollPosition + containerWidth, // Cuộn thêm một màn hình
+        scrollWidth - containerWidth // Không cuộn quá phần tử cuối
+      );
+
+      scrollContainerRef.current.scrollTo({
+        left: nextScrollPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   return (
     <>
       <Container class1="home-wrapper-1 py-5">
@@ -53,7 +140,7 @@ const Home = () => {
                 <h4>Build Confidence for Kids</h4>
                 <h5>4 - 6 years old</h5>
                 <p>Only $18.00</p>
-                <Link className="button">BUY NOW</Link>
+                <Link to={'product'} className="button">BUY NOW</Link>
               </div>
             </div>
           </div>
@@ -69,7 +156,7 @@ const Home = () => {
                   <h4>Event</h4>
                   <h5>Deli Brand</h5>
                   <p>
-                    Free <br /> 
+                    Free <br />
                   </p>
                 </div>
               </div>
@@ -83,7 +170,7 @@ const Home = () => {
                   <h4>NEW</h4>
                   <h5>Comics</h5>
                   <p>
-                    From $9.00 <br /> 
+                    From $9.00 <br />
                   </p>
                 </div>
               </div>
@@ -111,7 +198,7 @@ const Home = () => {
                   <h4>NEW ARRIVAL</h4>
                   <h5>Le Petit Prince</h5>
                   <p>
-                    From $999.00 <br /> 
+                    From $999.00 <br />
                   </p>
                 </div>
               </div>
@@ -138,145 +225,59 @@ const Home = () => {
           </div>
         </div>
       </Container>
-      {/*   <Container class1="home-wrapper-2 py-5">
-        <div className="row">
-          <div className="col-12">
-            <div className="categories d-flex justify-content-between flex-wrap align-items-center">
-              <div className="d-flex gap align-items-center">
-                <div>
-                  <h6>Music & Gaming</h6>
-                  <p>10 Items</p>
-                </div>
-                <img src="images/camera.jpg" alt="camera" />
-              </div>
-              <div className="d-flex gap align-items-center">
-                <div>
-                  <h6>Cameras</h6>
-                  <p>10 Items</p>
-                </div>
-                <img src="images/camera.jpg" alt="camera" />
-              </div>
-              <div className="d-flex gap align-items-center">
-                <div>
-                  <h6>Smart Tv</h6>
-                  <p>10 Items</p>
-                </div>
-                <img src="images/tv.jpg" alt="camera" />
-              </div>
-              <div className="d-flex gap align-items-center">
-                <div>
-                  <h6>Smart Watches</h6>
-                  <p>10 Items</p>
-                </div>
-                <img src="images/headphone.jpg" alt="camera" />
-              </div>
-              <div className="d-flex gap align-items-center">
-                <div>
-                  <h6>Music & Gaming</h6>
-                  <p>10 Items</p>
-                </div>
-                <img src="images/camera.jpg" alt="camera" />
-              </div>
-              <div className="d-flex gap align-items-center">
-                <div>
-                  <h6>Cameras</h6>
-                  <p>10 Items</p>
-                </div>
-                <img src="images/camera.jpg" alt="camera" />
-              </div>
-              <div className="d-flex gap align-items-center">
-                <div>
-                  <h6>Smart Tv</h6>
-                  <p>10 Items</p>
-                </div>
-                <img src="images/tv.jpg" alt="camera" />
-              </div>
-              <div className="d-flex gap align-items-center">
-                <div>
-                  <h6>Smart Watches</h6>
-                  <p>10 Items</p>
-                </div>
-                <img src="images/headphone.jpg" alt="camera" />
-              </div>
-            </div>
+      <Container class1="featured-wrapper py-5 home-wrapper-2">
+        <span style={{ fontSize: 20, fontWeight: 'bold' }}>Sản phẩm nổi bật</span>
+        <div style={{ background: '#fcdad8', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '20px 0px', borderRadius: 10 }}>
+          <div style={{ display: 'flex', justifyItems: 'center', flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: '30px', }}>
+            {topProduct.map((itemTop, indexTop) => {
+              return (
+                <ItemWishList key={indexTop} item={itemTop} index={indexTop} location={location} grid={grid} addToWish={addToWish} />
+              )
+            })}
           </div>
         </div>
-      </Container> */}
-      <Container class1="featured-wrapper py-5 home-wrapper-2">
-        <div className="row">
-          <div className="col-12">
-            <h3 className="section-heading">Featured Collection</h3>
-          </div>
-          {productState &&
-            productState?.map((item, index) => {
-              if (item.tags === "featured") {
-                return (
-                  <div key={index} className={"col-3"}>
-                    <div className="product-card position-relative">
-                      <div className="wishlist-icon position-absolute">
-                        <button className="border-0 bg-transparent">
-                          <img
-                            onClick={() => addToWish(item?._id)}
-                            src={wish}
-                            alt="wishlist"
-                          />
-                        </button>
-                      </div>
-                      <div className="product-image">
-                        <img
-                          src={item?.images[0].url}
-                          className="img-fluid  mx-auto"
-                          alt="product image"
-                          width={160}
-                        />
-                        <img
-                          src={watch2}
-                          className="img-fluid  mx-auto"
-                          alt="product image"
-                          width={160}
-                        />
-                      </div>
-                      <div className="product-details">
-                        <h6 className="brand">{item?.brand}</h6>
-                        <h5 className="product-title">{item?.title}</h5>
-                        <ReactStars
-                          count={5}
-                          size={24}
-                          value={item?.totalrating.toString()}
-                          edit={false}
-                          activeColor="#ffd700"
-                        />
+      </Container>
 
-                        <p className="price">$ {item?.price}</p>
-                      </div>
-                      <div className="action-bar position-absolute">
-                        <div className="d-flex flex-column gap-15">
-                          {/*  <button className="border-0 bg-transparent">
-                            <img src={prodcompare} alt="compare" />
-                          </button> */}
-                          <button className="border-0 bg-transparent">
-                            <img
-                              onClick={() => navigate("/product/" + item?._id)}
-                              src={view}
-                              alt="view"
-                            />
-                          </button>
-                          {/*   <button className="border-0 bg-transparent">
-                            <img src={addcart} alt="addcart" />
-                          </button> */}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
+      <Container class1="featured-wrapper py-5 home-wrapper-2">
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: 20, fontWeight: 'bold' }}>Danh sách sản phẩm</span>
+          <div style={{ flexDirection: 'row', display: 'flex' }}>
+            {dataSubCategoires.map((itemSub) => {
+              return (
+                <div style={{ marginRight: 5, background: 'white', padding: 7, borderRadius: 10 }}>
+                  <span>{itemSub.title}</span>
+                </div>
+              )
             })}
+          </div>
+        </div>
+        <div style={{ background: 'white', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '0px 0px', borderRadius: 10, position: 'relative' }}>
+          <div ref={scrollContainerRef} className="hidden-scroll-container" style={{ display: 'flex', flexDirection: 'row', gap: '5px', overflowX: 'auto', width: '100%', background: "#f5f5f7", zIndex: 1 }}>
+            {topProduct.map((itemTop, indexTop) => {
+              return (
+                <ItemWishList key={indexTop} item={itemTop} index={indexTop} location={location} grid={grid} addToWish={addToWish} />
+              )
+            })}
+          </div>
+
+          <div onClick={handleScrollLeft} style={{ position: 'absolute', left: 10, background: '#fcdad8', borderRadius: 100, padding: 10, cursor: 'pointer', zIndex: 2 }}>
+            <img src={left} style={{ width: 30, height: 30 }} />
+          </div>
+          <div onClick={handleScrollRight} style={{ position: 'absolute', right: 10, background: '#fcdad8', borderRadius: 100, padding: 10, cursor: 'pointer', zIndex: 2 }}>
+            <img src={right} style={{ width: 30, height: 30 }} />
+          </div>
         </div>
       </Container>
 
       <Container class1="famous-wrapper py-5 home-wrapper-2">
         <div className="row">
-          <div className="col-3">
+          <div onClick={() => {
+            navigate('/product')
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth', // Hiệu ứng cuộn mượt mà
+            });
+          }} className="col-3">
             <div className="famous-card position-relative">
               <img
                 src="images/famous-1.jpg"
@@ -290,7 +291,13 @@ const Home = () => {
               </div>
             </div>
           </div>
-          <div className="col-3">
+          <div onClick={() => {
+            navigate('/product')
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth', // Hiệu ứng cuộn mượt mà
+            });
+          }} className="col-3">
             <div className="famous-card position-relative">
               <img
                 src="images/famous-2.jpg"
@@ -304,7 +311,13 @@ const Home = () => {
               </div>
             </div>
           </div>
-          <div className="col-3">
+          <div onClick={() => {
+            navigate('/product')
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth', // Hiệu ứng cuộn mượt mà
+            });
+          }} className="col-3">
             <div className="famous-card position-relative">
               <img
                 src="images/famous-3.jpg"
@@ -320,7 +333,13 @@ const Home = () => {
               </div>
             </div>
           </div>
-          <div className="col-3">
+          <div onClick={() => {
+            navigate('/product')
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth', // Hiệu ứng cuộn mượt mà
+            });
+          }} className="col-3">
             <div className="famous-card position-relative">
               <img
                 src="images/famous-4.jpg"

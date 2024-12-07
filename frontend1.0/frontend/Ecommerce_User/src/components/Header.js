@@ -10,16 +10,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { getAProduct } from "../features/products/productSlice";
+import axios from "axios";
+import { base_url } from "../utils/axiosConfig";
+import ItemCategories from "./ItemCategories";
 
 const Header = () => {
   const dispatch = useDispatch();
   const cartState = useSelector((state) => state?.auth?.cartProducts);
   const authState = useSelector((state) => state?.auth);
   const productState = useSelector((state) => state?.product?.product);
+
   const [productOpt, setProductOpt] = useState([]);
   const [paginate, setPaginate] = useState(true);
   const navigate = useNavigate();
   const [total, setTotal] = useState(null);
+
+  const [dataCategories, setDataCategories] = useState([])
+
   useEffect(() => {
     let sum = 0;
     for (let index = 0; index < cartState?.length; index++) {
@@ -29,6 +36,7 @@ const Header = () => {
       setTotal(sum);
     }
   }, [cartState]);
+
   useEffect(() => {
     let data = [];
     for (let index = 0; index < productState.length; index++) {
@@ -38,12 +46,29 @@ const Header = () => {
     setProductOpt(data);
   }, [productState]);
 
+  // useEffect(() => {
+  //   handleGetCategories()
+  // }, [])
+
   const handleLogout = () => {
     localStorage.clear();
     window.location.reload();
   };
+
+  async function handleGetCategories() {
+    axios.get(`${base_url}category`, {
+      headers: {
+        "Content-Type": 'application/json',
+      }
+    }).then((res) => {
+      if (res.status === 200) {
+        setDataCategories(res.data)
+      }
+    })
+  }
+
   return (
-    <>
+    <div style={{ position: 'fixed', width: '100%', zIndex: 99 }}>
       {/* <header className="header-top-strip py-3">
         <div className="container-xxl">
           <div className="row">
@@ -72,7 +97,7 @@ const Header = () => {
               </h2>
             </div>
             <div className="col-5">
-              <div className="input-group">
+              <div className="input-group" style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
                 <Typeahead
                   id="pagination-example"
                   onPaginate={() => console.log("Results paginated")}
@@ -86,9 +111,10 @@ const Header = () => {
                   minLength={2}
                   placeholder="Search for Products here..."
                 />
-                <span className="input-group-text p-3" id="basic-addon2">
+
+                <div style={{ position: 'absolute', right: 10 }}>
                   <BsSearch className="fs-6" />
-                </span>
+                </div>
               </div>
             </div>
             <div className="col-5">
@@ -161,6 +187,7 @@ const Header = () => {
                     <button
                       className="btn btn-secondary dropdown-toggle bg-transparent border-0 gap-15 d-flex align-items-center"
                       type="button"
+                      onClick={() => handleGetCategories()}
                       id="dropdownMenuButton1"
                       data-bs-toggle="dropdown"
                       aria-expanded="false"
@@ -174,7 +201,10 @@ const Header = () => {
                       className="dropdown-menu"
                       aria-labelledby="dropdownMenuButton1"
                     >
-                      <li>
+                      {dataCategories.map((itemCategories) => {
+                        return <ItemCategories itemCategories={itemCategories} />
+                      })}
+                      {/* <li>
                         <Link className="dropdown-item text-white" to="">
                           Action
                         </Link>
@@ -188,7 +218,7 @@ const Header = () => {
                         <Link className="dropdown-item text-white" to="">
                           Something else here
                         </Link>
-                      </li>
+                      </li> */}
                     </ul>
                   </div>
                 </div>
@@ -213,7 +243,7 @@ const Header = () => {
           </div>
         </div>
       </header>
-    </>
+    </div>
   );
 };
 

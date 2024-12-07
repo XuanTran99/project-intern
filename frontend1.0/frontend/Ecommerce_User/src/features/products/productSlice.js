@@ -1,10 +1,11 @@
+/* eslint-disable no-whitespace-before-property */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import { productService } from "./productService";
 
 export const getAllProducts = createAsyncThunk(
   "product/get",
-  async (data,thunkAPI) => {
+  async (data, thunkAPI) => {
     try {
       return await productService.getProducts(data);
     } catch (error) {
@@ -16,7 +17,7 @@ export const getAllProducts = createAsyncThunk(
 
 export const getAProduct = createAsyncThunk(
   "product/getAProduct",
-  async (id,thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       return await productService.getSingleProduct(id);
     } catch (error) {
@@ -104,7 +105,7 @@ export const productSlice = createSlice({
         state.isError = true;
         state.isSuccess = false;
         state.message = action.error;
-      }) .addCase(addRating.pending, (state) => {
+      }).addCase(addRating.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(addRating.fulfilled, (state, action) => {

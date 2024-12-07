@@ -24,6 +24,8 @@ import Couponlist from "./pages/Couponlist";
 import AddCoupon from "./pages/AddCoupon";
 import ViewEnq from "./pages/ViewEnq";
 import ViewOrder from "./pages/ViewOrder";
+import AddSubCat from "./pages/AddSubCat ";
+import SubCategorylist from "./pages/SubCategorylist";
 function App() {
   return (
     <Router>
@@ -53,11 +55,15 @@ function App() {
           <Route path="list-category" element={<Categorylist />} />
           <Route path="category" element={<Addcat />} />
           <Route path="category/:id" element={<Addcat />} />
+          <Route path="list-subcategory" element={<SubCategorylist />} />
+          <Route path="subcategory" element={<AddSubCat />} />
+          <Route path="subcatergory/:id" element={<AddSubCat />} />
           <Route path="list-brand" element={<Brandlist />} />
           <Route path="brand" element={<Addbrand />} />
           <Route path="brand/:id" element={<Addbrand />} />
           <Route path="list-product" element={<Productlist />} />
           <Route path="product" element={<Addproduct />} />
+          <Route path="product/:id" element={<Addproduct />} />
         </Route>
       </Routes>
     </Router>

@@ -35,6 +35,7 @@ const Addcat = () => {
       dispatch(resetState());
     }
   }, [getPCatId]);
+
   useEffect(() => {
     if (isSuccess && createdCategory) {
       toast.success("Category Added Successfullly!");
@@ -47,6 +48,7 @@ const Addcat = () => {
       toast.error("Something Went Wrong!");
     }
   }, [isSuccess, isError, isLoading]);
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {

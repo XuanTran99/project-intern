@@ -16,4 +16,4 @@ var prodcategorySchema = new mongoose.Schema(
 );
 
 //Export the model
-module.exports = mongoose.model("PCategory", prodcategorySchema);
+module.exports = mongoose.model("bcategories", prodcategorySchema);

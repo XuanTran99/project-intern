@@ -1,52 +1,43 @@
 const mongoose = require("mongoose"); // Erase if already required
 
 // Declare the Schema of the Mongo model
+
 var orderSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required:true
+      required: true
     },
     shippingInfo: {
       firstName: {
         type: String,
-        required:true
+        required: true
       },
       lastName: {
         type: String,
-        required:true
+        required: true
       }
       ,
       address: {
         type: String,
-        required:true
+        required: true
       },
       city: {
         type: String,
-        required:true
+        required: true
       },
       state: {
         type: String,
-        required:true
+        required: true
       },
       other: {
         type: String,
-        required:true
+        required: true
       }
       ,
       pincode: {
         type: Number,
-        required:true
-      }
-    },
-    paymentInfo: {
-      razorpayOrderId: {
-        type: String,
-        required: true
-      },
-      razorpayPaymentId: {
-        type: String,
         required: true
       }
     },
@@ -54,43 +45,38 @@ var orderSchema = new mongoose.Schema(
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required:true
-        },
-        color: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Color",
-          required:true
+          ref: "products",
+          required: true
         },
         quantity: {
           type: Number,
-          required:true
+          required: true
         },
         price: {
           type: Number,
-          required:true
+          required: true
         }
       }
     ],
     paidAt: {
       type: Date,
-      default:Date.now()
+      default: Date.now()
     },
     month: {
       type: String,
-      default:new Date().getMonth()
+      default: new Date().getMonth()
     },
     totalPrice: {
       type: Number,
-      required:true
+      required: true
     },
     totalPriceAfterDiscount: {
       type: Number,
-      required:true
+      required: true
     },
     orderStaus: {
       type: String,
-      default:"Ordered"
+      default: "Ordered"
     }
   },
   {

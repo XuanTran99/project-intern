@@ -1,26 +1,33 @@
 const fs = require("fs");
 const asyncHandler = require("express-async-handler");
+const path = require('path');
 
 const {
   cloudinaryUploadImg,
   cloudinaryDeleteImg,
 } = require("../utils/cloudinary");
+
 const uploadImages = asyncHandler(async (req, res) => {
   try {
-    const uploader = (path) => cloudinaryUploadImg(path, "images");
-    const urls = [];
-    const files = req.files;
-    for (const file of files) {
-      const { path } = file;
-      const newpath = await uploader(path);
-      console.log(newpath);
-      urls.push(newpath);
-      fs.unlinkSync(path);
+    // Ensure that a single file is uploaded
+    const file = req.files[0];  // If only one file is expected
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded.' });
     }
-    const images = urls.map((file) => {
-      return file;
+
+    const filename = `${Date.now()}-${file.originalname}`;
+    const destinationPath = path.join(__dirname, 'public', 'images', 'products', filename);
+
+    // Move the uploaded file to the target folder (public/images/products)
+    if (!fs.existsSync(destinationPath)) {
+      fs.mkdirSync(destinationPath, { recursive: true });
+    }
+
+    res.json({
+      message: 'File uploaded successfully', data: {
+        filename: file.filename,
+      }
     });
-    res.json(images);
   } catch (error) {
     throw new Error(error);
   }

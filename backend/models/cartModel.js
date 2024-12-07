@@ -5,25 +5,21 @@ var cartSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:"User"
+      ref: "User"
     },
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:"Product"
+      ref: "products"
     },
     quantity: {
       type: Number,
-      required:true
+      required: true
     },
     price: {
       type: Number,
-      required:true
-      
+      required: true
+
     },
-    color: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref:"Color"
-    }
   },
   {
     timestamps: true,

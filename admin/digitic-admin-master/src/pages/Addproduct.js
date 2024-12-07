@@ -1,7 +1,7 @@
 import { React, useEffect, useState } from "react";
 import CustomInput from "../components/CustomInput";
 import ReactQuill from "react-quill";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import { toast } from "react-toastify";
 import * as yup from "yup";
@@ -13,86 +13,97 @@ import { getColors } from "../features/color/colorSlice";
 import { Select } from "antd";
 import Dropzone from "react-dropzone";
 import { delImg, uploadImg } from "../features/upload/uploadSlice";
-import { createProducts, resetState } from "../features/product/productSlice";
+import { createProducts, getProductsById, resetState, updateProducts } from "../features/product/productSlice";
+import { getSubCategories } from "../features/subpcategory/subpcategorySlice";
 let schema = yup.object().shape({
   title: yup.string().required("Title is Required"),
   description: yup.string().required("Description is Required"),
   price: yup.number().required("Price is Required"),
-  brand: yup.string().required("Brand is Required"),
-  category: yup.string().required("Category is Required"),
-  tags: yup.string().required("Tag is Required"),
-  color: yup
-    .array()
-    .min(1, "Pick at least one color")
-    .required("Color is Required"),
+  subcategory: yup.string().required("subcategory is Required"),
   quantity: yup.number().required("Quantity is Required"),
+  images: yup.string().required("Vui lòng chọn ảnh"),
+  brand: yup.string().required("Brand is Required"),
 });
 
 const Addproduct = () => {
+
+  const location = useLocation();
+  const getIdProduct = location.pathname.split("/")[3];
+
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [color, setColor] = useState([]);
   const [images, setImages] = useState([]);
-  console.log(color);
+
+  const subPCategories = useSelector((state) => state.subcategories.subPCategories);
+  const catState = useSelector((state) => state.pCategory.pCategories);
+  const brandState = useSelector((state) => state.brand.brands);
+  const imgState = useSelector((state) => state.upload.images);
+  const { newProduct } = useSelector((state) => state.product);
+
   useEffect(() => {
+    // dispatch(getCategories());
     dispatch(getBrands());
-    dispatch(getCategories());
-    dispatch(getColors());
+    dispatch(getSubCategories());
   }, []);
 
-  const brandState = useSelector((state) => state.brand.brands);
-  const catState = useSelector((state) => state.pCategory.pCategories);
-  const colorState = useSelector((state) => state.color.colors);
-  const imgState = useSelector((state) => state.upload.images);
-  const newProduct = useSelector((state) => state.product);
-  const { isSuccess, isError, isLoading, createdProduct } = newProduct;
   useEffect(() => {
-    if (isSuccess && createdProduct) {
-      toast.success("Product Added Successfullly!");
-    }
-    if (isError) {
-      toast.error("Something Went Wrong!");
-    }
-  }, [isSuccess, isError, isLoading]);
-  const coloropt = [];
-  colorState.forEach((i) => {
-    coloropt.push({
-      label: i.title,
-      value: i._id,
-    });
-  });
-  const img = [];
-  imgState.forEach((i) => {
-    img.push({
-      public_id: i.public_id,
-      url: i.url,
-    });
-  });
 
-  useEffect(() => {
-    formik.values.color = color ? color : " ";
-    formik.values.images = img;
-  }, [color, img]);
+    if (getIdProduct !== undefined) {
+      dispatch(getProductsById(getIdProduct))
+    } else {
+      dispatch(resetState());
+    }
+
+  }, [getIdProduct])
+
+
+
+
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     toast.success("Product Added Successfullly!");
+  //   }
+  //   if (isError) {
+  //     toast.error("Something Went Wrong!");
+  //   }
+  // }, [isSuccess, isError, isLoading]);
+
+
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      title: "",
-      description: "",
-      price: "",
-      brand: "",
-      category: "",
-      tags: "",
-      color: "",
-      quantity: "",
-      images: "",
+      title: newProduct?.title || "",
+      description: newProduct?.description || "",
+      price: newProduct?.price || "",
+      subcategory: newProduct?.subcategory?._id || null,
+      quantity: newProduct?.quantity || '',
+      images: newProduct?.images || '',
+      brand: newProduct?.brand?._id || null
     },
     validationSchema: schema,
     onSubmit: (values) => {
-      dispatch(createProducts(values));
-      formik.resetForm();
-      setColor(null);
-      setTimeout(() => {
-        dispatch(resetState());
-      }, 3000);
+      if (getIdProduct !== undefined) {
+        dispatch(updateProducts({
+          id: newProduct._id,
+          data: values
+        }));
+        toast.success("Product Added Successfullly!");
+        formik.resetForm();
+        setTimeout(() => {
+          navigate('/admin/list-product')
+          dispatch(resetState());
+        }, 3000);
+      } else {
+        dispatch(createProducts(values));
+        formik.resetForm();
+        toast.success("Product Added Successfullly!");
+        setTimeout(() => {
+          dispatch(resetState());
+        }, 3000);
+      }
+
     },
   });
   const handleColors = (e) => {
@@ -101,7 +112,7 @@ const Addproduct = () => {
   };
   return (
     <div>
-      <h3 className="mb-4 title">Add Product</h3>
+      <h3 className="mb-4 title">{!getIdProduct ? "Add Product" : "Update Product"}</h3>
       <div>
         <form
           onSubmit={formik.handleSubmit}
@@ -151,7 +162,7 @@ const Addproduct = () => {
             <option value="">Select Brand</option>
             {brandState.map((i, j) => {
               return (
-                <option key={j} value={i.title}>
+                <option key={j} value={i._id}>
                   {i.title}
                 </option>
               );
@@ -161,56 +172,26 @@ const Addproduct = () => {
             {formik.touched.brand && formik.errors.brand}
           </div>
           <select
-            name="category"
-            onChange={formik.handleChange("category")}
-            onBlur={formik.handleBlur("category")}
-            value={formik.values.category}
+            name="subcategory"
+            onChange={formik.handleChange("subcategory")}
+            onBlur={formik.handleBlur("subcategory")}
+            value={formik.values.subcategory}
             className="form-control py-3 mb-3"
             id=""
           >
-            <option value="">Select Category</option>
-            {catState.map((i, j) => {
+            <option value="">Select SubCategory</option>
+            {subPCategories.map((i, j) => {
               return (
-                <option key={j} value={i.title}>
+                <option key={j} value={i._id}>
                   {i.title}
                 </option>
               );
             })}
           </select>
           <div className="error">
-            {formik.touched.category && formik.errors.category}
-          </div>
-          <select
-            name="tags"
-            onChange={formik.handleChange("tags")}
-            onBlur={formik.handleBlur("tags")}
-            value={formik.values.tags}
-            className="form-control py-3 mb-3"
-            id=""
-          >
-            <option value="" disabled>
-              Select Category
-            </option>
-            <option value="featured">Featured</option>
-            <option value="popular">Popular</option>
-            <option value="special">Special</option>
-          </select>
-          <div className="error">
-            {formik.touched.tags && formik.errors.tags}
+            {formik.touched.subcategory && formik.errors.subcategory}
           </div>
 
-          <Select
-            mode="multiple"
-            allowClear
-            className="w-100"
-            placeholder="Select colors"
-            defaultValue={color}
-            onChange={(i) => handleColors(i)}
-            options={coloropt}
-          />
-          <div className="error">
-            {formik.touched.color && formik.errors.color}
-          </div>
           <CustomInput
             type="number"
             label="Enter Product Quantity"
@@ -222,9 +203,14 @@ const Addproduct = () => {
           <div className="error">
             {formik.touched.quantity && formik.errors.quantity}
           </div>
-          <div className="bg-white border-1 p-5 text-center">
+          {!newProduct && <div className="bg-white border-1 p-5 text-center">
             <Dropzone
-              onDrop={(acceptedFiles) => dispatch(uploadImg(acceptedFiles))}
+              onDrop={async (acceptedFiles) => {
+                let res = await dispatch(uploadImg(acceptedFiles))
+                if (res?.payload?.data?.filename) {
+                  formik.setFieldValue("images", res?.payload?.data?.filename)
+                }
+              }}
             >
               {({ getRootProps, getInputProps }) => (
                 <section>
@@ -237,27 +223,15 @@ const Addproduct = () => {
                 </section>
               )}
             </Dropzone>
-          </div>
-          <div className="showimages d-flex flex-wrap gap-3">
-            {imgState?.map((i, j) => {
-              return (
-                <div className=" position-relative" key={j}>
-                  <button
-                    type="button"
-                    onClick={() => dispatch(delImg(i.public_id))}
-                    className="btn-close position-absolute"
-                    style={{ top: "10px", right: "10px" }}
-                  ></button>
-                  <img src={i.url} alt="" width={200} height={200} />
-                </div>
-              );
-            })}
+          </div>}
+          <div className="error">
+            {formik.touched.images && formik.errors.images}
           </div>
           <button
             className="btn btn-success border-0 rounded-3 my-5"
             type="submit"
           >
-            Add Product
+            {!getIdProduct ? "Add Product" : "Update Product"}
           </button>
         </form>
       </div>

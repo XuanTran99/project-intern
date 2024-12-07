@@ -9,29 +9,24 @@ const {
 } = require("../utils/cloudinary");
 const fs = require("fs");
 
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'uploads/'); // Lưu tệp vào thư mục 'uploads'
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, Date.now() + path.extname(file.originalname)); // Tạo tên tệp duy nhất
+//   }
+// });
+
+// const upload = multer({ storage: storage });
+
 const createProduct = asyncHandler(async (req, res) => {
   try {
+
     if (req.body.title) {
       req.body.slug = slugify(req.body.title);
     }
-//KHÁC
-
-    // Xử lý dữ liệu `images` đầu vào
-    let { images } = req.body;
-
-    // Nếu `images` là chuỗi, chuyển thành mảng đối tượng
-    if (typeof images === 'string') {
-      images = [{ url: images }];
-    }
-
-    // Nếu `images` là mảng các chuỗi, chuyển thành mảng đối tượng
-    if (Array.isArray(images) && typeof images[0] === 'string') {
-      images = images.map((url) => ({ url }));
-    }
-
-    req.body.images = images;
-//KHÁC
-
+    //KHÁC
     const newProduct = await Product.create(req.body);
     res.json(newProduct);
   } catch (error) {
@@ -40,7 +35,7 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 const updateProduct = asyncHandler(async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   validateMongoDbId(id);
   try {
     if (req.body.title) {
@@ -48,15 +43,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
 
     // Xử lý dữ liệu `images`
-    let { images } = req.body;
-    if (typeof images === 'string') {
-      images = [{ url: images }];
-    }
-    if (Array.isArray(images) && typeof images[0] === 'string') {
-      images = images.map((url) => ({ url }));
-    }
-    req.body.images = images;
-
     const updateProduct = await Product.findOneAndUpdate({ id }, req.body, {
       new: true,
     });
@@ -81,7 +67,7 @@ const getaProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
-    const findProduct = await Product.findById(id).populate("color");
+    const findProduct = await Product.findById(id).populate("subcategory", "title").populate("brand", "title");
     res.json(findProduct);
   } catch (error) {
     throw new Error(error);
@@ -97,7 +83,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-    let query = Product.find(JSON.parse(queryStr));
+    let query = Product.find(JSON.parse(queryStr)).populate("subcategory", "title").populate("brand", "title");
 
     // Sorting
 
@@ -248,12 +234,29 @@ const uploadImages = asyncHandler(async (req, res) => {
 });
 
 const deleteImages = asyncHandler(async (req, res) => {
-  const {id} = req.params; 
+  const { id } = req.params;
   try {
     const deleted = cloudinaryDeleteImgImg(path, "images");
     res.json({ message: "Deleted" });
   } catch (error) {
     throw new Error(error);
+  }
+});
+
+const getTopProducts = asyncHandler(async (req, res) => {
+  try {
+
+    const limit = parseInt(req.query.limit) || 10;
+
+    const products = await Product.find().populate("subcategory", "title").populate("brand", "title")
+      .sort({ quantity: -1 })
+      .limit(limit)
+      .select("-__v");
+
+    // Return the result
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -267,4 +270,5 @@ module.exports = {
   rating,
   uploadImages,
   deleteImages,
+  getTopProducts
 };

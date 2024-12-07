@@ -754,3 +754,8 @@ footer .input-group-text {
   font-size: 12px;
   color: red;
 }
+
+
+.hidden-scroll-container::-webkit-scrollbar {
+  display: none; /* Ẩn scrollbar cho Chrome, Safari, Edge */
+}

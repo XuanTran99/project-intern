@@ -1,5 +1,5 @@
-import React, { useEffect,useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { BiArrowBack } from "react-icons/bi";
 import watch from "../images/watch.jpg";
 import Container from "../components/Container";
@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { useFormik } from 'formik'
 import * as yup from "yup"
 import axios from 'axios'
-import { config } from "../utils/axiosConfig";
+import { base_url, base_url_image, config } from "../utils/axiosConfig";
 import { createAnOrder } from "../features/user/userSlice";
 
 const shippingSchema = yup.object({
@@ -22,40 +22,39 @@ const shippingSchema = yup.object({
 
 const Checkout = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const cartState = useSelector(state => state.auth.cartProducts)
   const [totalAmount, setTotalAmount] = useState(null);
   const [shippingInfo, setShippingInfo] = useState(null)
   const [paymentInfo, setPaymentInfo] = useState({ razorpayPaymentId: "", razorpayOrderId: "" })
-  const [cartProductState,setCartProductState]=useState([])
-console.log(paymentInfo,shippingInfo);
+  const [cartProductState, setCartProductState] = useState([])
   useEffect(() => {
     let sum = 0;
     for (let index = 0; index < cartState?.length; index++) {
       sum = sum + (Number(cartState[index].quantity) * cartState[index].price)
       setTotalAmount(sum)
-      
+
     }
   }, [cartState])
   const formik = useFormik({
     initialValues: {
-      firstName:"",
-  lastName: "",
-  address: "",
-  state: "",
-  city: "",
-  country: "",
+      firstName: "",
+      lastName: "",
+      address: "",
+      state: "",
+      city: "",
+      country: "",
       pincode: "",
-  other:""
+      other: ""
     },
     validationSchema: shippingSchema,
     onSubmit: (values) => {
       setShippingInfo(values)
-    setTimeout(() => {
-      checkOutHandler()
-    }, 300);
+      setTimeout(() => {
+        checkOutHandler(values)
+      }, 300);
     },
   });
-  console.log(shippingInfo);
 
   const loadScript = (src) => {
     return new Promise((resolve) => {
@@ -71,75 +70,88 @@ console.log(paymentInfo,shippingInfo);
     })
   }
   useEffect(() => {
-    let items=[]
+    let items = []
     for (let index = 0; index < cartState?.length; index++) {
-      items.push({product:cartState[index].productId._id,quantity:cartState[index].quantity,color:cartState[index].color._id,price:cartState[index].price})
-        
+      // items.push({product:cartState[index].productId._id,quantity:cartState[index].quantity,color:cartState[index].color._id,price:cartState[index].price})
+      items.push({ product: cartState[index].productId._id, quantity: cartState[index].quantity, color: '', price: cartState[index].price })
     }
     setCartProductState(items)
-  },[])
+  }, [])
 
-  const checkOutHandler = async () => {
-    
-    const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js")
-    if (!res) {
-      alert("Razorpay SDK failed to Load")
-      return;
-    }
-  
-    const result = await axios.post("http://localhost:5000/api/user/order/checkout",{amount:totalAmount+5},config)
+  const checkOutHandler = async (values) => {
+
+    // const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js")
+    // if (!res) {
+    //   alert("Razorpay SDK failed to Load")
+    //   return;
+    // }
+
+    const result = await axios.post(`${base_url}user/order/checkout`, { amount: totalAmount + 5 }, config)
+
     if (!result) {
       alert("Something Went Wrong")
       return;
     }
-   
+
 
     const { amount, id: order_id, currency } = result.data.order
-    console.log(amount);
-    const options = {
-      key: "", // Enter the Key ID generated from the Dashboard
-      amount: amount,
-      currency: currency,
-      name: "Infinity",
-      description: "Test Transaction",
-      
-      order_id: order_id,
-      handler: async function (response) {
-          const data = {
-              orderCreationId: order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id,
-              
-          };
 
-          const result = await axios.post("http://localhost:5000/api/user/order/paymentVerification", data,config);
 
-       await setPaymentInfo({
-          razorpayPaymentId: response.razorpayPaymentId,
-          razorpayOrderId: response.razorpayOrderId,
-        })
-        
-        
 
-        setTimeout(() => {
-          dispatch(createAnOrder({totalPrice:totalAmount,totalPriceAfterDiscount:totalAmount,orderItems:cartProductState,paymentInfo,shippingInfo}))
-        },300)
-      },
-      prefill: {
-          name: "Infinity",
-          email: "sristy@example.com",
-          contact: "9999999999",
-      },
-      notes: {
-          address: "Infinity Office",
-      },
-      theme: {
-          color: "#61dafb",
-      },
-  };
+    let resCreateOrder = await dispatch(createAnOrder({ totalPrice: totalAmount, totalPriceAfterDiscount: amount, orderItems: cartProductState, paymentInfo, shippingInfo: values }))
+    if (resCreateOrder.payload.status !== 500) {
+      setTimeout(() => {
+        navigate('/')
+      }, 300)
+    }
 
-  const paymentObject = new window.Razorpay(options);
-  paymentObject.open();
+    // if (resCreateOrder.status !== 'fail') {
+    //   
+    // }
+
+    // const options = {
+    //   key: "", // Enter the Key ID generated from the Dashboard
+    //   amount: amount,
+    //   currency: currency,
+    //   name: "Infinity",
+    //   description: "Test Transaction",
+
+    //   order_id: order_id,
+    //   handler: async function (response) {
+    //     const data = {
+    //       orderCreationId: order_id,
+    //       razorpayPaymentId: response.razorpay_payment_id,
+    //       razorpayOrderId: response.razorpay_order_id,
+
+    //     };
+
+    //     const result = await axios.post(`${base_url}user/order/paymentVerification`, data, config);
+
+    //     // await setPaymentInfo({
+    //     //   razorpayPaymentId: response.razorpayPaymentId,
+    //     //   razorpayOrderId: response.razorpayOrderId,
+    //     // }
+
+
+    //     setTimeout(() => {
+
+    //     }, 300)
+    //   },
+    //   // prefill: {
+    //   //   name: "Infinity",
+    //   //   email: "sristy@example.com",
+    //   //   contact: "9999999999",
+    //   // },
+    //   // notes: {
+    //   //   address: "Infinity Office",
+    //   // },
+    //   // theme: {
+    //   //   color: "#61dafb",
+    //   // },
+    // };
+
+    // const paymentObject = new window.Razorpay(options);
+    // paymentObject.open();
   }
 
   return (
@@ -213,7 +225,7 @@ console.log(paymentInfo,shippingInfo);
                     onChange={formik.handleChange("firstName")}
                     onBlur={formik.handleBlur("firstName")}
                   />
-                   <div className="error ms-2 my-1">
+                  <div className="error ms-2 my-1">
                     {
                       formik.touched.firstName && formik.errors.firstName
                     }
@@ -279,7 +291,7 @@ console.log(paymentInfo,shippingInfo);
                   </div>
                 </div>
                 <div className="flex-grow-1">
-                  <select  name="state"
+                  <select name="state"
                     value={formik.values.state}
                     onChange={formik.handleChange("state")}
                     onBlur={formik.handleBlur("state")} className="form-control form-select" id="">
@@ -331,34 +343,36 @@ console.log(paymentInfo,shippingInfo);
             <div className="border-bottom py-4">
               {
                 cartState && cartState?.map((item, index) => {
+
+                  let img = item?.productId?.images ? `${base_url_image}${item?.productId?.images}` : watch
                   return (<div key={index} className="d-flex gap-10 mb-2 align-align-items-center">
-                  <div className="w-75 d-flex gap-10">
-                    <div className="w-25 position-relative">
-                      <span
-                        style={{ top: "-10px", right: "2px" }}
-                        className="badge bg-secondary text-white rounded-circle p-2 position-absolute"
-                      >
-                        {item?.quantity}
-                      </span>
-                      <img  width={100} height={100} src={item?.productId?.images[0]?.url} alt="product" />
+                    <div className="w-75 d-flex gap-10">
+                      <div className="w-25 position-relative">
+                        <span
+                          style={{ top: "-10px", right: "2px" }}
+                          className="badge bg-secondary text-white rounded-circle p-2 position-absolute"
+                        >
+                          {item?.quantity}
+                        </span>
+                        <img width={100} height={100} src={img} alt="product" />
+                      </div>
+                      <div>
+                        <h5 className="total-price"> {item?.productId?.title}</h5>
+                        <p className="total-price">{item?.color?.title}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h5 className="total-price"> {item?.productId?.title}</h5>
-                      <p className="total-price">{item?.color?.title}</p>
+                    <div className="flex-grow-1">
+                      <h5 className="total">$ {item?.price * item?.quantity}</h5>
                     </div>
-                  </div>
-                  <div className="flex-grow-1">
-                    <h5 className="total">$ {item?.price * item?.quantity}</h5>
-                  </div>
-                </div>)
+                  </div>)
                 })
               }
-              
+
             </div>
             <div className="border-bottom py-4">
               <div className="d-flex justify-content-between align-items-center">
                 <p className="total">Subtotal</p>
-                <p className="total-price">$ {totalAmount?totalAmount:"0"}</p>
+                <p className="total-price">$ {totalAmount ? totalAmount : "0"}</p>
               </div>
               <div className="d-flex justify-content-between align-items-center">
                 <p className="mb-0 total">Shipping</p>
@@ -367,7 +381,7 @@ console.log(paymentInfo,shippingInfo);
             </div>
             <div className="d-flex justify-content-between align-items-center border-bootom py-4">
               <h4 className="total">Total</h4>
-              <h5 className="total-price">$ {totalAmount?totalAmount+5:"0"}</h5>
+              <h5 className="total-price">$ {totalAmount ? totalAmount + 5 : "0"}</h5>
             </div>
           </div>
         </div>

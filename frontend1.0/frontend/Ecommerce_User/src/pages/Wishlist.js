@@ -5,6 +5,8 @@ import Container from "../components/Container";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProductWishlist } from "../features/user/userSlice";
 import { addToWishlist } from "../features/products/productSlice";
+import watch from "../images/watch.jpg";
+import { base_url_image } from "../utils/axiosConfig";
 
 const Wishlist = () => {
   const dispatch = useDispatch();
@@ -32,6 +34,7 @@ const Wishlist = () => {
           )}
           {wishlistState &&
             wishlistState?.map((item, index) => {
+              let img = item?.images ? base_url_image + item?.images : watch
               return (
                 <div className="col-3" key={index}>
                   <div className="wishlist-card position-relative">
@@ -45,14 +48,10 @@ const Wishlist = () => {
                     />
                     <div className="wishlist-card-image bg-white">
                       <img
-                        src={
-                          item?.images[0].url
-                            ? item?.images[0].url
-                            : "images/watch.jpg"
-                        }
+                        src={img}
                         className="img-fluid  d-block mx-auto"
                         alt="watch"
-                        width={160}
+                        style={{ height: 240, width: 160, objectFit: 'cover' }}
                       />
                     </div>
                     <div className="py-3 px-3">

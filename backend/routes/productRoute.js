@@ -9,11 +9,13 @@ const {
   rating,
   uploadImages,
   deleteImages,
+  getTopProducts,
 } = require("../controller/productCtrl");
 const { isAdmin, authMiddleware } = require("../middlewares/authMiddleware.js");
-const {uploadPhoto, productImgResize} = require("../middlewares/uploadImage.js");
+const { uploadPhoto, productImgResize } = require("../middlewares/uploadImage.js");
 const router = express.Router();
 
+router.get("/top-product", getTopProducts);
 router.post("/", authMiddleware, isAdmin, createProduct);
 router.post(
   "/upload",
@@ -32,5 +34,6 @@ router.delete("/:id", authMiddleware, isAdmin, deleteProduct);
 router.delete("/delete-img/:id", authMiddleware, isAdmin, deleteImages);
 
 router.get("/", getAllProduct);
+
 
 module.exports = router;

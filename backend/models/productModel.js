@@ -22,37 +22,24 @@ var productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    category: {
-      type: String,
+    subcategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "subcategories",
       required: true,
     },
     brand: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "brands",
       required: true,
     },
     quantity: {
       type: Number,
       required: true,
     },
-    sold: {
-      type: Number,
-      default: 0,
+    images: {
+      type: String,
+      required: true,
     },
-    images: [ //KHÁC
-      // {
-      //   public_id: String,
-      //   url: String,
-      // },
-      {
-        url: { type: String, required: true },
-        alt: { type: String, default: '' },
-    },
-    ],
-    color: [
-      // { type: mongoose.Schema.Types.ObjectId, ref: "Color" }
-    ],
-    tags: [],
-    // tags: String,
     ratings: [
       {
         star: Number,
@@ -69,4 +56,4 @@ var productSchema = new mongoose.Schema(
 );
 
 //Export the model
-module.exports = mongoose.model("Product", productSchema);
+module.exports = mongoose.model("products", productSchema);

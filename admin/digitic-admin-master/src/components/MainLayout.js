@@ -18,6 +18,7 @@ import { SiBrandfolder } from "react-icons/si";
 import { BiCategoryAlt } from "react-icons/bi";
 import { Layout, Menu, theme } from "antd";
 import { useNavigate } from "react-router-dom";
+import { TbSubtask } from "react-icons/tb";
 const { Header, Sider, Content } = Layout;
 const MainLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -89,6 +90,16 @@ const MainLayout = () => {
                   key: "list-category",
                   icon: <BiCategoryAlt className="fs-4" />,
                   label: "Category List",
+                },
+                {
+                  key: "subcategory",
+                  icon: <TbSubtask className="fs-4" />,
+                  label: "SubCategory",
+                },
+                {
+                  key: "list-subcategory",
+                  icon: <TbSubtask className="fs-4" />,
+                  label: "Subcategory List",
                 },
                 // {
                 //   key: "color",

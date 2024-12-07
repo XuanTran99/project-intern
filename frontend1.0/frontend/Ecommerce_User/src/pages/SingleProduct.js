@@ -18,9 +18,9 @@ import {
 } from "../features/products/productSlice";
 import { toast } from "react-toastify";
 import { addProdToCart, getUserCart } from "../features/user/userSlice";
+import { base_url_image } from "../utils/axiosConfig";
 
 const SingleProduct = () => {
-  const [color, setColor] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [alreadyAdded, setAlreadyAdded] = useState(false);
   const location = useLocation();
@@ -28,6 +28,8 @@ const SingleProduct = () => {
   const getProductId = location.pathname.split("/")[2];
   const dispatch = useDispatch();
   const productState = useSelector((state) => state?.product?.singleproduct);
+  console.log(productState);
+
   const productsState = useSelector((state) => state?.product?.product);
   const cartState = useSelector((state) => state?.auth?.cartProducts);
   useEffect(() => {
@@ -44,18 +46,10 @@ const SingleProduct = () => {
   }, []);
 
   const uploadCart = () => {
-    //   if (color === null) {
-    //     toast.error("Please Choose Color")
-    //     return false
-    //   } else {
-    //     dispatch(addProdToCart({ productId: productState?._id, quantity, color, price: productState?.price }))
-    //     navigate('/cart')
-    //  }
     dispatch(
       addProdToCart({
         productId: productState?._id,
         quantity,
-        color: color || null, // Gửi null nếu không có màu được chọn
         price: productState?.price,
       })
     );
@@ -66,8 +60,8 @@ const SingleProduct = () => {
     height: 600,
     zoomWidth: 600,
 
-    img: productState?.images[0]?.url
-      ? productState?.images[0]?.url
+    img: productState?.images
+      ? `${base_url_image}${productState?.images}`
       : "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg",
   };
 
@@ -81,7 +75,7 @@ const SingleProduct = () => {
     document.execCommand("copy");
     textField.remove();
   };
-  const closeModal = () => {};
+  const closeModal = () => { };
   const [popularProduct, setPopularProduct] = useState([]);
   useEffect(() => {
     let data = [];
@@ -128,13 +122,7 @@ const SingleProduct = () => {
               </div>
             </div>
             <div className="other-product-images d-flex flex-wrap gap-15">
-              {productState?.images.map((item, index) => {
-                return (
-                  <div>
-                    <img src={item?.url} className="img-fluid" alt="" />
-                  </div>
-                );
-              })}
+              {productState?.images ? <im src={`${base_url_image}${productState?.images}`} className="img-fluid" alt="" /> : <img src={watch} className="img-fluid" alt="" />}
             </div>
           </div>
           <div className="col-6">
@@ -165,11 +153,11 @@ const SingleProduct = () => {
                 </div>
                 <div className="d-flex gap-10 align-items-center my-2">
                   <h3 className="product-heading">Brand :</h3>
-                  <p className="product-data">{productState?.brand}</p>
+                  <p className="product-data">{productState?.brand?.title || ''}</p>
                 </div>
                 <div className="d-flex gap-10 align-items-center my-2">
-                  <h3 className="product-heading">Category :</h3>
-                  <p className="product-data">{productState?.category}</p>
+                  <h3 className="product-heading">SubCategory :</h3>
+                  <p className="product-data">{productState?.subcategory?.title || ''}</p>
                 </div>
                 <div className="d-flex gap-10 align-items-center my-2">
                   <h3 className="product-heading">Tags :</h3>
@@ -177,7 +165,7 @@ const SingleProduct = () => {
                 </div>
                 <div className="d-flex gap-10 align-items-center my-2">
                   <h3 className="product-heading">Availablity :</h3>
-                  <p className="product-data">In Stock</p>
+                  <p className="product-data">{productState?.quantity}</p>
                 </div>
                 {/*     <div className="d-flex gap-10 flex-column mt-2 mb-3">
                   <h3 className="product-heading">Size :</h3>
@@ -196,7 +184,7 @@ const SingleProduct = () => {
                     </span>
                   </div>
                 </div> */}
-                {alreadyAdded === false && (
+                {/* {alreadyAdded === false && (
                   <>
                     <div className="d-flex gap-10 flex-column mt-2 mb-3">
                       <h3 className="product-heading">Color :</h3>
@@ -206,7 +194,7 @@ const SingleProduct = () => {
                       />
                     </div>
                   </>
-                )}
+                )} */}
                 <div className="d-flex align-items-center gap-15 flex-row mt-2 mb-3">
                   {alreadyAdded === false && (
                     <>
@@ -216,6 +204,7 @@ const SingleProduct = () => {
                           type="number"
                           name=""
                           min={1}
+                          disabled={productState?.quantity === 0 ? true : false}
                           max={10}
                           className="form-control"
                           style={{ width: "70px" }}
@@ -235,14 +224,16 @@ const SingleProduct = () => {
                   >
                     <button
                       className="button border-0"
+                      style={{ background: productState?.quantity === 0 && 'gray' }}
                       /*  data-bs-toggle="modal"
                       data-bs-target="#staticBackdrop" */
                       type="button"
+                      disabled={productState?.quantity === 0 ? true : false}
                       onClick={() => {
                         alreadyAdded ? navigate("/cart") : uploadCart();
                       }}
                     >
-                      {alreadyAdded ? "Go To Cart" : "Add to Cart"}
+                      {productState?.quantity === 0 ? "Hết hàng" : alreadyAdded ? "Go To Cart" : "Add to Cart"}
                     </button>
                     {/*  <button className="button signup">Buy It Now</button> */}
                   </div>

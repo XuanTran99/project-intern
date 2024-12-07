@@ -35,7 +35,7 @@ export const getUserProductWishlist = createAsyncThunk(
 
 export const addProdToCart = createAsyncThunk(
   "user/cart/add",
-  async (cartData,thunkAPI) => {
+  async (cartData, thunkAPI) => {
     try {
       return await authService.addToCart(cartData);
     } catch (error) {
@@ -45,7 +45,7 @@ export const addProdToCart = createAsyncThunk(
 );
 export const createAnOrder = createAsyncThunk(
   "user/cart/create-order",
-  async (orderDetail,thunkAPI) => {
+  async (orderDetail, thunkAPI) => {
     try {
       return await authService.createOrder(orderDetail);
     } catch (error) {
@@ -80,7 +80,7 @@ export const getOrders = createAsyncThunk(
 
 export const deleteCartProduct = createAsyncThunk(
   "user/cart/product/delete",
-  async (cartItemId,thunkAPI) => {
+  async (cartItemId, thunkAPI) => {
     try {
       return await authService.removeProductFromCart(cartItemId);
     } catch (error) {
@@ -90,7 +90,7 @@ export const deleteCartProduct = createAsyncThunk(
 );
 export const updateCartProduct = createAsyncThunk(
   "user/cart/product/update",
-  async (cartDetail,thunkAPI) => {
+  async (cartDetail, thunkAPI) => {
     try {
       return await authService.updateProductFromCart(cartDetail);
     } catch (error) {
@@ -101,7 +101,7 @@ export const updateCartProduct = createAsyncThunk(
 
 export const updateProfile = createAsyncThunk(
   "user/profile/update",
-  async (data,thunkAPI) => {
+  async (data, thunkAPI) => {
     try {
       return await authService.updateUser(data);
     } catch (error) {
@@ -112,7 +112,7 @@ export const updateProfile = createAsyncThunk(
 
 export const forgotPasswordToken = createAsyncThunk(
   "user/password/token",
-  async (data,thunkAPI) => {
+  async (data, thunkAPI) => {
     try {
       return await authService.forgotPassToken(data);
     } catch (error) {
@@ -123,7 +123,7 @@ export const forgotPasswordToken = createAsyncThunk(
 
 export const resetPassword = createAsyncThunk(
   "user/password/reset",
-  async (data,thunkAPI) => {
+  async (data, thunkAPI) => {
     try {
       return await authService.resetPass(data);
     } catch (error) {
@@ -229,7 +229,7 @@ export const authSlice = createSlice({
         state.isError = false;
         state.isSuccess = true;
         state.cartProducts = action.payload;
-       
+
       }).addCase(getUserCart.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
@@ -246,13 +246,13 @@ export const authSlice = createSlice({
         if (state.isSuccess) {
           toast.success("Product Deleted From Cart Successfully!")
         }
-       
+
       }).addCase(deleteCartProduct.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
         state.message = action.error;
-        if (state.isSuccess===false) {
+        if (state.isSuccess === false) {
           toast.error("Something Went Wrong!")
         }
       })
@@ -266,13 +266,13 @@ export const authSlice = createSlice({
         if (state.isSuccess) {
           toast.success("Product Updated From Cart Successfully!")
         }
-       
+
       }).addCase(updateCartProduct.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
         state.message = action.error;
-        if (state.isSuccess===false) {
+        if (state.isSuccess === false) {
           toast.error("Something Went Wrong!")
         }
       })
@@ -286,13 +286,13 @@ export const authSlice = createSlice({
         if (state.isSuccess) {
           toast.success("Ordered Successfully")
         }
-       
+
       }).addCase(createAnOrder.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
         state.message = action.error;
-        if (state.isSuccess===false) {
+        if (state.isSuccess === false) {
           toast.error("Something Went Wrong!")
         }
       }).addCase(getOrders.pending, (state) => {
@@ -302,14 +302,14 @@ export const authSlice = createSlice({
         state.isError = false;
         state.isSuccess = true;
         state.getorderedProduct = action.payload;
-     
-       
+
+
       }).addCase(getOrders.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
         state.message = action.error;
-        
+
       }).addCase(updateProfile.pending, (state) => {
         state.isLoading = true;
       }).addCase(updateProfile.fulfilled, (state, action) => {
@@ -320,13 +320,13 @@ export const authSlice = createSlice({
         if (state.isSuccess) {
           toast.success("Profile Updated Successfully")
         }
-       
+
       }).addCase(updateProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
         state.message = action.error;
-        if (state.isSuccess===false) {
+        if (state.isSuccess === false) {
           toast.error("Something Went Wrong!")
         }
       }).addCase(forgotPasswordToken.pending, (state) => {
@@ -339,13 +339,13 @@ export const authSlice = createSlice({
         if (state.isSuccess) {
           toast.success("Forgot Passwprd Email Sent Successfully")
         }
-       
+
       }).addCase(forgotPasswordToken.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
         state.message = action.error;
-        if (state.isSuccess===false) {
+        if (state.isSuccess === false) {
           toast.error("Something Went Wrong!")
         }
       }).addCase(resetPassword.pending, (state) => {
@@ -358,13 +358,13 @@ export const authSlice = createSlice({
         if (state.isSuccess) {
           toast.success("Password Updated Successfully")
         }
-       
+
       }).addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.isSuccess = false;
         state.message = action.error;
-        if (state.isSuccess===false) {
+        if (state.isSuccess === false) {
           toast.error("Something Went Wrong!")
         }
       })
